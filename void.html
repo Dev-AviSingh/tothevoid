@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+
+
+	<head>
+		<style type = "text/css">
+			body{
+				background-color: #222222;
+				color: #ffffff;
+				font-size: 1.2em;
+			}
+			.titleBar{
+				position:fixed;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+				width: 100%;
+				left: 0%;
+				top: 0;
+				height: 2em;
+				font-size: 1.5em;
+				margin: 0;
+				border: 1px solid white;
+				background-color: black;
+			}
+			#voidArea{
+				position: absolute;
+				width: 80%;
+				left: 10%;
+				top: 4em;
+				height: 100%;
+				padding: 10px;
+				box-shadow: 0 0 2px 2px white;
+			}
+			#screamButton{
+				position: fixed;
+				display: flex;
+				align-items: center;
+				height: 2em;
+				right: 3%;
+				bottom: 3%;
+				border-radius: 100px;
+				padding: 5px;
+				background-image: linear-gradient(to bottom right, black, #222222);
+				box-shadow: 0px 0px 2px 2px white;
+			}
+			#screamButton:hover{
+				box-shadow: 0px 0px 2px 2px red;
+			}
+			.screamBox{
+				position: relative;
+				display: inline-block;
+				padding: 5px;
+				margin: 2px;
+				margin-left: 10px;
+				border-radius: 10px;
+				box-shadow: 0 0 0.5px 0.5px #99ff99;
+				word-wrap: break-word;
+				max-width: 20em;
+			}
+			#screamInput{
+				display: none;
+				position: absolute;
+				width: 40%;
+				height: 40%;
+				left: 30%;
+				top: 20%;
+				padding: 2%;
+				box-shadow: 0 0 2px 2px white;
+				background-color: linear-gradient(to bottom right, black, #333333);
+			}
+			#name {
+				padding-bottom: 10px;
+			}
+			.closeButton{
+				position: absolute;
+				right: 1%;
+				top: 1%;
+				font-size: 2em;
+				color: white;
+			}
+			.closeButton:link{
+				text-decoration: none;
+				color: white;
+			}
+			.closeButton:hover{
+				text-shadow: 0 0 1px 1px black;
+			}
+		</style>
+		<script type = "text/javascript" src = "https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+		<script type = "text/javascript">
+			function loadAllScreams(limit){
+				var xhr = new XMLHttpRequest();
+				var url = window.location.protocol + "//" + window.location.host + "/" + "screams.txt";
+				xhr.onreadystatechange = function(){
+					if (xhr.status == 200){						
+						var data = xhr.responseText;
+						var screamData = data.split("\n");
+						
+						screamData.shift();
+						
+						var voidArea = document.getElementById("voidArea");
+						for(var i = voidArea.children.length; i < screamData.length; i++){
+							if (screamData[i]){
+								var replacements = {
+									"<":"&lt;",
+									">":"&gt;",
+									"/":"&sol;",
+									"\"":"&quot;",
+									"'":"&apos;",
+									"&":"&amp;"
+								}
+								for(var sign in Object.keys(replacements)){
+									screamData[i].replace(replacements[sign], sign);
+								}
+								voidArea.innerHTML += "<span class = \"screamBox\">" + screamData[i] + "</span>";
+							}else {console.log("Weird data at position " + i + ": ", screamData[i]);}
+						}
+						
+						console.log("Data received" + data + " from " + url);
+					}
+				};
+				
+				xhr.open("GET", url, false);
+				xhr.send();
+			}
+			function toggleScreamInputBox(){
+				var inputBox = document.getElementById("screamInput");
+				console.log(inputBox.style.display);
+				if (inputBox.style.display == "none" || inputBox.style.display == ""){
+					inputBox.style.display = "block";
+				}else{
+					inputBox.style.display = "none";
+				}
+				
+			}
+			function sendNewScream(){
+				var xhr = new XMLHttpRequest();
+				var screamerAlias = document.getElementById("name").value;
+				var screamData = document.getElementById("newScream").value;
+				
+				// Attempt at preventing xss
+				var replacements = {
+					"<":"&lt;",
+					">":"&gt;",
+					"/":"&sol;",
+					"\"":"&quot;",
+					"'":"&apos;",
+					"&":"&amp;"
+				};
+				for(var sign in Object.keys(replacements)){
+					screamData.replace(sign, replacements[sign]);
+				}
+				
+				var markdownConverter = new showdown.Converter();
+				screamData = markdownConverter.makeHtml(screamData);
+				
+				xhr.open("GET", "/void?" + "newscream=" + screamData + "&alias=" + screamerAlias, false);
+				xhr.onreadystatechange = function(){
+					if (xhr.status == 200){
+						toggleScreamInputBox();
+						alert("Scream recorded successfully.")
+						loadAllScreams(100);
+					}
+					else if(xhr.status == 500){
+						alert("Some server error occured. + \n${xhr.responseText}");
+						loadAllScreams(100);
+					}
+				}
+				
+				xhr.send();
+			}
+		</script>
+	</head>
+
+	<body>
+		<div id = "voidArea">
+			<script type="text/javascript">loadAllScreams(100);</script>
+		</div>
+		<a href = "javascript:toggleScreamInputBox();">
+		<div id = "screamButton">
+			Scream Here
+		</div>
+		</a>
+		
+		<div class = "titleBar">
+			WELCOME TO THE VOID
+		</div>
+		
+		<div id = "screamInput">
+			<input id = "name" type = "text" placeholder = "Your alias."/>
+			<textarea id = "newScream" style = "width: 100%; max-width: 100%; height: 30%;max-height: 30%;resize: none;" rows = "5" cols="20" placeholder = "Enter whatever you want to tell to the void."></textarea>
+			<input type = "submit" onclick = "sendNewScream()"/>
+			<a class = "closeButton" href = "javascript:toggleScreamInputBox()">X</a>
+		</div>
+		
+	</body>
+
+</html>
