@@ -1,0 +1,25 @@
+{
+  "name": "tothevoid",
+  "version": "1.0.0",
+  "description": "A thought sharing platform assuring 100% anonymity.",
+  "main": "index.js",
+  "scripts": {
+    "test": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dev-AviSingh/tothevoid.git"
+  },
+  "author": "Avanish Kumar Singh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Dev-AviSingh/tothevoid/issues"
+  },
+  "homepage": "https://github.com/Dev-AviSingh/tothevoid#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.4.4"
+  }
+}
